@@ -3,9 +3,11 @@
 namespace Encore\Admin\Config;
 
 use Encore\Admin\Admin;
-use Encore\Admin\Extension;
+use Encore\Admin\Auth\Database\Menu;
+use Encore\Admin\Auth\Database\Permission;
 
-class Config extends Extension
+
+class Config
 {
     /**
      * Load configure into laravel from database.
@@ -26,9 +28,9 @@ class Config extends Extension
      */
     public static function boot()
     {
-        static::registerRoutes();
+        self::registerRoutes();
 
-        Admin::extend('config', __CLASS__);
+        //Admin::extend('config', __CLASS__);
     }
 
     /**
@@ -38,13 +40,13 @@ class Config extends Extension
      */
     protected static function registerRoutes()
     {
-        parent::routes(function ($router) {
-            /* @var \Illuminate\Routing\Router $router */
-            $router->resource(
-                config('admin.extensions.config.name', 'config'),
-                config('admin.extensions.config.controller', 'Encore\Admin\Config\ConfigController')
-            );
-        });
+        $router = app('router');
+
+        $router->resource(
+            config('admin.extensions.config.name', 'config'),
+            config('admin.extensions.config.controller', 'Encore\Admin\Config\ConfigController')
+        );
+        //dump($router);
     }
 
     /**
@@ -52,8 +54,16 @@ class Config extends Extension
      */
     public static function import()
     {
-        parent::createMenu('Config', 'config', 'fa-toggle-on');
+        Menu::create([
+            'title'     => 'Config',
+            'icon'      => 'fa-toggle-on',
+            'uri'       => 'config',
+        ]);
+        $permission = new Permission();
+        $permission->name = 'Admin Config';
+        $permission->display_name = 'ext.config';
+        $permission->description = 'config*';
+        $permission->save();
 
-        parent::createPermission('Admin Config', 'ext.config', 'config*');
     }
 }
